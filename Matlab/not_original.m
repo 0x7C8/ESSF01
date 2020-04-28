@@ -33,7 +33,7 @@ P1 = -1.45e4;
 P2 = -3.2e3
 
 %% Är alla poler dominanta?:
-w0_2p = sqrt((abs( (1-ABnoll)*P1*P2 ))
+w0_2p = sqrt((abs( (1-ABnoll)*P1*P2 )))
 SummaP = P1+P2 %Summa slingpoler
 SummaP_p = -sqrt(2)*w0_2p %Summa av systempoler (2st)
 %Kolla att summaP > SummaP_p --> bara dominanta poler som kan flyttas till
