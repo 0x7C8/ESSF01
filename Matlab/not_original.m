@@ -18,9 +18,9 @@ R1 = 100; % (Ohm)
 RL = 1000;    % (Ohm)
 AtINF = -1/R1;  %Asymptotiska förstärkningen
 
-Ic1ab = (9.4e-3)/2; %Strömmen i ingångssteget
+Ic1ab = (10e-3)/2; %Strömmen i ingångssteget
 rpi_p = 2*Bf1*VT/Ic1ab; %rpi_p = 2*rpi
-Ic2 = 2.5e-3; % (A)
+Ic2 = 5e-3; % (A)
 rpi2 = Bf2*VT/Ic2;
 gm2 = Ic2/VT;
 
@@ -28,9 +28,9 @@ gm2 = Ic2/VT;
 %rpi2_new = rpi2*Rbias/(rpi2+Rbias)
 
 %DC slingförstärkning och slingpoler:
-ABnoll = -100;
-P1 = -1.45e4;
-P2 = -3.2e3
+ABnoll = (-100);
+P1 = -(R1+Rs+rpi_p)/((R1+Rs)*C1*rpi_p)
+P2 = -1/(rpi2*C2)
 
 %% Är alla poler dominanta?:
 w0_2p = sqrt((abs( (1-ABnoll)*P1*P2 )))
@@ -52,31 +52,21 @@ ABs = ABnoll/((1-s/P1)*(1-s/P2))
 
 At = AtINF*(-1)*ABs/(1-ABs); %Slutna förstärkningen, icke kompenserad.
 
-%%Implementera fantomnollan, undersök alla fall:
-%Här tittar vi bara på Cph || R2
-delta_Cph = 10.17; %Effektivt om delta > 7
-Cph = -1/(R2*n)
-AtINF_Cph = AtINF*( 1 - s/(AtINF*n) ) / (1 - s/n) 
-
-%%Efter kompensering för MFM med fantomnolla:
-%%Cph || med R2:
-ABs_n_Cph = ABnoll*(1-s/n)/((1-s/P1)*(1-s/P2)*(1-s/(delta_Cph*n)))
-Atn_Cph = AtINF_Cph*(-1)*ABs_n_Cph/(1-ABs_n_Cph)
-
-
 %% %%%%FIGURER
 %Fasmarginal kollas "open loop", dvs frekvensen w0, där |AB(w0)| = 1 = 0dB, före = ABs och efter = ABs_n kompensering
 %(Bode-funktionen behöver ibland ett (-1).* pga 'Phase unwrap')
 figure(1)
-bode((-1).*ABs,'b',(-1).*ABs_n_Cph,'k--'); 
-title('Slingf�rst�rkning: före och efter fantomnolla'); legend('AB(s)','AB_n Cph(s)','Location','Best')
+bode((-1).*ABs,'b'); 
+title('Slingf�rst�rkning');
+grid on
 
 figure(2)
-bode(At,'b',Atn_Cph,'k--'); hold on; 
-title('Den slutna förstärkningen, At'); legend('A_t','A_{tn,Cph}','Location','Best')
+bode(At,'b'); 
+title('Den slutna förstärkningen, At');
+grid on
     
 figure(3)
-step(At);hold on;step(Atn_Cph); 
+step(At);
 title('Stegsvaren före och efter kompensering')
 
 
