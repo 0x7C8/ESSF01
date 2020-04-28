@@ -6,22 +6,22 @@
 clear all; close all;
 
 %% Definiera Data
-VT=25*1e-3;
-Bf1=250; %Kolla datablad!
+VT=25e-3;   % (V)
+Bf1=250; % Kolla datablad!
 Bf2=Bf1;
-C1=100*1e-9; %Ersätter Cpi1_prim
-C2=2.2*1e-6; %Ersätter Cpi2
+C1=100e-9; % (F) - Ersätter Cpi1_prim
+C2=2.2e-6; % (F) - Ersätter Cpi2
 
 %% Förstärkare 
-Rs=100; %Källan är inte ideal
-R1=500;
-R2=5*1e3;
-RL=1000; 
-AtINF=1+R2/R1;%Asymptotiska förstärkningen
+Rs=100; % (Ohm) %Källan är inte ideal
+R1=500; % (Ohm)
+R2=5e3; % (Ohm)
+RL=1000;    % (Ohm)
+AtINF=1+R2/R1;  %Asymptotiska förstärkningen
 
-Ic1ab=(9.4*1e-3)/2; %Strömmen i ingångssteget
+Ic1ab=(9.4e-3)/2; %Strömmen i ingångssteget
 rpi_p=2*Bf1*VT/Ic1ab; %rpi_p=2*rpi
-Ic2=2*1e-3; %Krav: max 100mV peak in --> max 1.1V peak ut, RL*Ic2>1,1V
+Ic2=2e-3; %Krav: max 100mV peak in --> max 1.1V peak ut, RL*Ic2>1,1V
 rpi2=Bf2*VT/Ic2;
 gm2=Ic2/VT;
 
@@ -31,8 +31,8 @@ rpi2_new=rpi2*Rbias/(rpi2+Rbias)
 
 %DC slingförstärkning och slingpoler:
 ABnoll=-100 
-P1=-1.45*1e4;
-P2=-3.2*1e3
+P1=-1.45e4;
+P2=-3.2e3
 
 %% Är alla poler dominanta?:
 w0_2p=(abs( (1-ABnoll)*P1*P2 ))^(1/2)
