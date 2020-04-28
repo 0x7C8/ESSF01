@@ -13,23 +13,22 @@ C1 = 100e-9; % (F) - Ersätter Cpi1_prim
 C2 = 2.2e-6; % (F) - Ersätter Cpi2
 
 %% Förstärkare 
-Rs = 100; % (Ohm) %Källan är inte ideal
-R1 = 500; % (Ohm)
+Rs = 50; % (Ohm) %Källan är inte ideal
+R1 = 100; % (Ohm)
 RL = 1000;    % (Ohm)
-AtINF = 1+R2/R1;  %Asymptotiska förstärkningen
+AtINF = -1/R1;  %Asymptotiska förstärkningen
 
 Ic1ab = (9.4e-3)/2; %Strömmen i ingångssteget
 rpi_p = 2*Bf1*VT/Ic1ab; %rpi_p = 2*rpi
-Ic2 = 2e-3; %Krav: max 100mV peak in --> max 1.1V peak ut, RL*Ic2>1,1V
+Ic2 = 2.5e-3; % (A)
 rpi2 = Bf2*VT/Ic2;
 gm2 = Ic2/VT;
 
-Rbias = 150; %Dålig biasering med Rbias! (använd strömspegel) Rbias = 0.7/Ic1ab ,Biaserar upp GE steget.
-rpi2_new = rpi2*Rbias/(rpi2+Rbias)
-
+%Rbias = 150; %Dålig biasering med Rbias! (använd strömspegel) Rbias = 0.7/Ic1ab ,Biaserar upp GE steget.
+%rpi2_new = rpi2*Rbias/(rpi2+Rbias)
 
 %DC slingförstärkning och slingpoler:
-ABnoll = -100 
+ABnoll = -100;
 P1 = -1.45e4;
 P2 = -3.2e3
 
@@ -47,11 +46,11 @@ n = -(w0_2p^2)/(sqrt(2)*w0_2p+P1+P2)
 s = zpk('s') %Definiera s
 
 %Före kompensering: (Betraktas som ett system med två poler)
-ABs = ABnoll/((1-s/P1)*(1-s/P2)) 
-At = AtINF*(-1)*ABs/(1-ABs); %Slutna förstärkningen, icke kompenserad.
-
+ABs = ABnoll/((1-s/P1)*(1-s/P2))
 [gain_margin, phase_margin] = margin((-1)*ABs) %Ignorera gain margin (mer om den i reglerteknik).
 %Matlab verkar inte gilla negativa system, s� -1 beh�vs f�r att f� r�tt fasmarginal.
+
+At = AtINF*(-1)*ABs/(1-ABs); %Slutna förstärkningen, icke kompenserad.
 
 %%Implementera fantomnollan, undersök alla fall:
 %Här tittar vi bara på Cph || R2
