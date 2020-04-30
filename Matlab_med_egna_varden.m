@@ -12,7 +12,7 @@ Bf1=250; %Kolla datablad!
 Bf2=Bf1;
 C1=100*1e-9; %Ersätter Cpi1_prim
 C2=2.2*1e-6; %Ersätter Cpi2
-
+C2ny=40*1e-6; %ers�tter C2 vid capacitive narrowbandning
 %%Förstärkare 
 Rs=50; %Källan är inte ideal
 R1=100;
@@ -20,9 +20,9 @@ R1=100;
 RL=1000; 
 AtINF=-1/R1;%Asymptotiska förstärkningen
 
-Ic1ab=(9.4*1e-3)/2; %Strömmen i ingångssteget
+Ic1ab=(9*1e-3)/2; %Strömmen i ingångssteget
 rpi_p=2*Bf1*VT/Ic1ab; %rpi_p=2*rpi
-Ic2=1*1e-3; %Krav: max 100mV peak in --> max 1.1V peak ut, RL*Ic2>1,1V Obs!! H�r ska vi ha Krav: max 100mV peak in --> max 0.001 mA ut.  
+Ic2=5*1e-3; %Krav: max 100mV peak in --> max 1.1V peak ut, RL*Ic2>1,1V Obs!! H�r ska vi ha Krav: max 100mV peak in --> max 0.001 mA ut.  
 rpi2=Bf2*VT/Ic2;
 gm2=Ic2/VT;
 
@@ -31,9 +31,9 @@ rpi2_new=rpi2*Rbias/(rpi2+Rbias)
 
 
 %DC slingförstärkning och slingpoler:
-ABnoll= (-100); %-Bf2*Bf1
-P1=-1.45*1e4;
-P2=-3.2*1e3
+ABnoll= -(Bf1*Bf2*R1)/(Rs+R1+rpi_p);
+P1=-(R1+Rs+rpi_p)/((R1+Rs)*C1*rpi_p)
+P2=-1/(rpi2*C2)
 
 %%Är alla poler dominanta?:
 w0_2p=(abs( (1-ABnoll)*P1*P2 ))^(1/2)
@@ -45,36 +45,59 @@ n=-(w0_2p^2)/(sqrt(2)*w0_2p+P1+P2)
 
 
 %%%%%%FREKVENSKOMPENSERING
-%%Undersök fasmarginal före och efter kompensering:
+
 s=zpk('s') %Definiera s
 
-%Före kompensering: (Betraktas som ett system med två poler)
-ABs=ABnoll/((1-s/P1)*(1-s/P2)) 
-At=AtINF*(-1)*ABs/(1-ABs); %Slutna förstärkningen, icke kompenserad.
+% %Före kompensering: (Betraktas som ett system med två poler)
+ ABs=ABnoll/((1-s/P1)*(1-s/P2)) 
+ At=AtINF*(-1)*ABs/(1-ABs); %Slutna förstärkningen, icke kompenserad.
+% 
+%Kompensering med capacitive narrow banding
+P2ny=-1/(rpi2*C2ny);
+ABsny=ABnoll/((1-s/P1)*(1-s/P2ny));
+Atny=AtINF*(-1)*ABsny/(1-ABsny); %Slutna förstärkningen, kompenserad Capacitive Narrow Banding.
+%
+%%Undersök fasmarginal före och efter kompensering:
 
-%%Implementera fantomnollan, undersök alla fall:
-%Här tittar vi bara på Cph || R2
-delta_Cph=10.17; %Effektivt om delta > 7
-Cph=-1/(R2*n)
-AtINF_Cph=AtINF*( 1 - s/(AtINF*n) ) / (1 - s/n) 
 
-%%Efter kompensering för MFM med fantomnolla:
-%%Cph || med R2:
-ABs_n_Cph=ABnoll*(1-s/n)/((1-s/P1)*(1-s/P2)*(1-s/(delta_Cph*n)))
-Atn_Cph=AtINF_Cph*(-1)*ABs_n_Cph/(1-ABs_n_Cph)
+[gain_margin_before, phase_margin_before] = margin((-1)*ABs) %Ignorera gain margin (mer om den i reglerteknik). 
+%Matlab verkar inte gilla negativa system, s� -1 beh�vs f�r att f� r�tt fasmarginal.
+
+[gain_margin_after, phase_margin_after] = margin((-1)*ABsny)
+%
+%
+% %%Implementera fantomnollan, undersök alla fall:
+ % Lph i serie med R1
+ delta_Lph=1.5; %Effektivt om delta > 7
+ Lph=-R1/n;
+ AtINF_Lph= 1/(R1 + s*Lph); 
+% 
+% %%Efter kompensering för MFM med fantomnolla:
+% %%Lph serie med R1:
+ ABs_n_Lph=ABnoll*(1-s/n)/((1-s/P1)*(1-s/P2)*(1-s/(delta_Lph*n)));
+ Atn_Lph=AtINF_Lph*(-1)*ABs_n_Lph/(1-ABs_n_Lph);
+
+% Cph parallel med Rs
+ delta_Cph=1.5;
+ Cph=-1/(Rs*n);
+ AtINF_Cph= AtINF;
+% %%Efter kompensering för MFM med fantomnolla:
+% %%Cph || Rs:
+ ABs_n_Cph=ABnoll*(1-s/n)/((1-s/P1)*(1-s/P2)*(1-s/(delta_Lph*n)))
+ Atn_Cph=AtINF_Cph*(-1)*ABs_n_Cph/(1-ABs_n_Cph) 
 
 
 %%%%%%FIGURER
 %Fasmarginal kollas "open loop", dvs frekvensen w0, där |AB(w0)|=1=0dB, före=ABs och efter=ABs_n kompensering
 %(Bode-funktionen behöver ibland ett (-1).* pga 'Phase unwrap')
-figure(1);bode((-1).*ABs,'b',(-1).*ABs_n_Cph,'k--'); 
-title('Slingf�rst�rkning: före och efter fantomnolla'); legend('AB(s)','AB_n Cph(s)','Location','Best')
+figure(1);bode((-1).*ABs,'b',(-1).*ABs_n_Lph,'k--', (-1).*ABs_n_Cph, 'r--', (-1).*ABsny, 'y--'); 
+title('Slingf�rst�rkning:'); legend('AB(s)','AB_n Lph(s)','AB_nCph(s)','ABny(s)','Location','Best')
 
-figure(2);bode(At,'b',Atn_Cph,'k--'); hold on; 
-title('Den slutna förstärkningen, At'); legend('A_t','A_{tn,Cph}','Location','Best')
+figure(2);bode(At,'b',Atn_Lph,'k--',Atn_Cph,'r--', Atny,'y--'); hold on; %
+title('Den slutna förstärkningen, At'); legend('A_t','A_{tn,Lph}','A_{tn,Cph}','A_t_ny','Location','Best')
     
-figure(3); step(At);hold on;step(Atn_Cph); 
-title('Stegsvaren före och efter kompensering')
+figure(3); step((-1)*At);hold on;step(Atn_Lph);step((-1)*Atn_Cph);step((-1)*Atny); 
+title('Stegsvaren före och efter kompensering'); legend('A_t','A_{tn,Lph}','A_{tn,Cph}','A_t_ny','Location','Best')
 
 
 
