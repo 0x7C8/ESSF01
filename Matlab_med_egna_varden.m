@@ -1,122 +1,129 @@
-%Analog elektronik - Matlab hjÃ¤lp 
-%Matlab exemplel fÃ¶r att kolla fasmarginal och slutna fÃ¶rstÃ¤rkningen, samt
-%berÃ¤kna slingpoler och titta pÃ¥ stegsvar mm.
-%2-stegs fÃ¶rstÃ¤rkare (ASGE-GE), fÃ¶re och efter kompensering
+%Analog elektronik - Matlab hjälp 
+%Matlab exemplel för att kolla fasmarginal och slutna förstärkningen, samt
+%beräkna slingpoler och titta på stegsvar mm.
+%2-stegs förstärkare (ASGE-GE), före och efter kompensering
 %Med Egna värden
 
 clear all; close all;
 
-%%Definiera Data
-VT=25*1e-3;
-Bf1=250; %Kolla datablad!
-Bf2=Bf1;
-C1=100*1e-9; %ErsÃ¤tter Cpi1_prim
-C2=2.2*1e-6; %ErsÃ¤tter Cpi2
-C2ny=40*1e-6; %ersätter C2 vid capacitive narrowbandning
-%%FÃ¶rstÃ¤rkare 
-Rs=50; %KÃ¤llan Ã¤r inte ideal
-R1=100;
-%R2=5*1e3;
-RL=1000; 
-AtINF=-1/R1;%Asymptotiska fÃ¶rstÃ¤rkningen
+%% Definiera Data
+VT = 25e-3;
+Bf1 = 250; %Kolla datablad!
+Bf2 = Bf1;
+C1 = 100e-9; %Ersätter Cpi1_prim
+C2 = 2.2e-6; %Ersätter Cpi2
+C2ny = 40e-6; %ersätter C2 vid capacitive narrowbandning
 
-Ic1ab=(9*1e-3)/2; %StrÃ¶mmen i ingÃ¥ngssteget
-rpi_p=2*Bf1*VT/Ic1ab; %rpi_p=2*rpi
-Ic2=5*1e-3; %Krav: max 100mV peak in --> max 1.1V peak ut, RL*Ic2>1,1V Obs!! Här ska vi ha Krav: max 100mV peak in --> max 0.001 mA ut.  
-rpi2=Bf2*VT/Ic2;
-gm2=Ic2/VT;
+%% Förstärkare 
+Rs = 50; %Källan är inte ideal
+R1 = 100;
+%R2 = 5e3;
+RL = 1000; 
+AtINF = -1/R1;%Asymptotiska förstärkningen
 
-Rbias=150; %DÃ¥lig biasering med Rbias! (anvÃ¤nd strÃ¶mspegel) Rbias=0.7/Ic1ab ,Biaserar upp GE steget.
-rpi2_new=rpi2*Rbias/(rpi2+Rbias)
+Ic1ab = (9e-3)/2; %Strömmen i ingångssteget
+rpi_p = 2*Bf1*VT/Ic1ab; %rpi_p = 2*rpi
+Ic2 = 5e-3; %Krav: max 100mV peak in --> max 1.1V peak ut, RL*Ic2>1,1V Obs!! Här ska vi ha Krav: max 100mV peak in --> max 0.001 mA ut.  
+rpi2 = Bf2*VT/Ic2;
+gm2 = Ic2/VT;
 
+Rbias = 150; %Dålig biasering med Rbias! (använd strömspegel) Rbias = 0.7/Ic1ab ,Biaserar upp GE steget.
+rpi2_new = rpi2*Rbias/(rpi2+Rbias)
 
-%DC slingfÃ¶rstÃ¤rkning och slingpoler:
-ABnoll= -(Bf1*Bf2*R1)/(Rs+R1+rpi_p);
-P1=-(R1+Rs+rpi_p)/((R1+Rs)*C1*rpi_p)
-P2=-1/(rpi2*C2)
+%DC slingförstärkning och slingpoler:
+ABnoll = -(Bf1*Bf2*R1)/(Rs+R1+rpi_p);
+P1 = -(R1+Rs+rpi_p)/((R1+Rs)*C1*rpi_p)
+P2 = -1/(rpi2*C2)
 
-%%Ã„r alla poler dominanta?:
-w0_2p=(abs( (1-ABnoll)*P1*P2 ))^(1/2)
-SummaP=P1+P2 %Summa slingpoler
-SummaP_p=-sqrt(2)*w0_2p %Summa av systempoler (2st)
+%% Är alla poler dominanta?:
+w0_2p = (abs( (1-ABnoll)*P1*P2 ))^(1/2)
+SummaP = P1+P2 %Summa slingpoler
+SummaP_p = -sqrt(2)*w0_2p %Summa av systempoler (2st)
 %Kolla att summaP > SummaP_p --> bara dominanta poler som kan flyttas till
-%Ã¶nskad position
-n=-(w0_2p^2)/(sqrt(2)*w0_2p+P1+P2)
+%önskad position
+n = -(w0_2p^2)/(sqrt(2)*w0_2p+P1+P2)
 
 
-%%%%%%FREKVENSKOMPENSERING
+%% FREKVENSKOMPENSERING
 
-s=zpk('s') %Definiera s
+s = zpk('s'); %Definiera s
 
-% %FÃ¶re kompensering: (Betraktas som ett system med tvÃ¥ poler)
- ABs=ABnoll/((1-s/P1)*(1-s/P2)) 
- At=AtINF*(-1)*ABs/(1-ABs); %Slutna fÃ¶rstÃ¤rkningen, icke kompenserad.
+%Före kompensering: (Betraktas som ett system med två poler)
+ABs = ABnoll/((1-s/P1)*(1-s/P2)) 
+At = AtINF*(-1)*ABs/(1-ABs); %Slutna förstärkningen, icke kompenserad.
 % 
 %Kompensering med capacitive narrow banding
-P2ny=-1/(rpi2*C2ny);
-ABsny=ABnoll/((1-s/P1)*(1-s/P2ny));
-Atny=AtINF*(-1)*ABsny/(1-ABsny); %Slutna fÃ¶rstÃ¤rkningen, kompenserad Capacitive Narrow Banding.
+P2ny = -1/(rpi2*C2ny);
+ABsny = ABnoll/((1-s/P1)*(1-s/P2ny));
+Atny = AtINF*(-1)*ABsny/(1-ABsny); %Slutna förstärkningen, kompenserad Capacitive Narrow Banding.
 %
-%%UndersÃ¶k fasmarginal fÃ¶re och efter kompensering:
-
+%%Undersök fasmarginal före och efter kompensering:
 
 [gain_margin_before, phase_margin_before] = margin((-1)*ABs) %Ignorera gain margin (mer om den i reglerteknik). 
+[gain_margin_after, phase_margin_after] = margin((-1)*ABsny)
 %Matlab verkar inte gilla negativa system, så -1 behövs för att få rätt fasmarginal.
 
-[gain_margin_after, phase_margin_after] = margin((-1)*ABsny)
-%
-%
-% %%Implementera fantomnollan, undersÃ¶k alla fall:
- % Lph i serie med R1
- delta_Lph=1.5; %Effektivt om delta > 7
- Lph=-R1/n;
- AtINF_Lph= 1/(R1 + s*Lph); 
-% 
-% %%Efter kompensering fÃ¶r MFM med fantomnolla:
-% %%Lph serie med R1:
- ABs_n_Lph=ABnoll*(1-s/n)/((1-s/P1)*(1-s/P2)*(1-s/(delta_Lph*n)));
- Atn_Lph=AtINF_Lph*(-1)*ABs_n_Lph/(1-ABs_n_Lph);
 
-% Cph parallel med Rs
- delta_Cph=1.5;
- Cph=-1/(Rs*n);
- AtINF_Cph= AtINF;
-% %%Efter kompensering fÃ¶r MFM med fantomnolla:
-% %%Cph || Rs:
- ABs_n_Cph=ABnoll*(1-s/n)/((1-s/P1)*(1-s/P2)*(1-s/(delta_Lph*n)))
- Atn_Cph=AtINF_Cph*(-1)*ABs_n_Cph/(1-ABs_n_Cph) 
+%% Implementera fantomnollan, undersök alla fall:
+% Lph i serie med R1
+delta_Lph = 1.5; %Effektivt om delta > 7
+Lph = -R1/n;
+AtINF_Lph = 1/(R1 + s*Lph); 
+
+%Efter kompensering för MFM med fantomnolla:
+%Lph serie med R1:
+ABs_n_Lph = ABnoll*(1-s/n)/((1-s/P1)*(1-s/P2)*(1-s/(delta_Lph*n)));
+Atn_Lph = AtINF_Lph*(-1)*ABs_n_Lph/(1-ABs_n_Lph);
+
+%Cph parallel med Rs
+delta_Cph = 1.5;
+Cph = -1/(Rs*n);
+AtINF_Cph = AtINF;
+%Efter kompensering för MFM med fantomnolla:
+%Cph || Rs:
+ABs_n_Cph = ABnoll*(1-s/n)/((1-s/P1)*(1-s/P2)*(1-s/(delta_Lph*n)))
+Atn_Cph = AtINF_Cph*(-1)*ABs_n_Cph/(1-ABs_n_Cph) 
 
 
-%%%%%%FIGURER
-%Fasmarginal kollas "open loop", dvs frekvensen w0, dÃ¤r |AB(w0)|=1=0dB, fÃ¶re=ABs och efter=ABs_n kompensering
-%(Bode-funktionen behÃ¶ver ibland ett (-1).* pga 'Phase unwrap')
-figure(1);bode((-1).*ABs,'b',(-1).*ABs_n_Lph,'k--', (-1).*ABs_n_Cph, 'r--', (-1).*ABsny, 'y--'); 
-title('Slingförstärkning:'); legend('AB(s)','AB_n Lph(s)','AB_nCph(s)','ABny(s)','Location','Best')
+%% FIGURER
+%Fasmarginal kollas "open loop", dvs frekvensen w0, där |AB(w0)| = 1 = 0dB, före = ABs och efter = ABs_n kompensering
+%(Bode-funktionen behöver ibland ett (-1).* pga 'Phase unwrap')
+figure(1);
+bode((-1).*ABs,'b',(-1).*ABs_n_Lph,'k--', (-1).*ABs_n_Cph, 'r--', (-1).*ABsny, 'y--'); 
+title('Slingförstärkning:');
+legend('AB(s)','AB_n Lph(s)','AB_nCph(s)','ABny(s)','Location','Best')
 
-figure(2);bode(At,'b',Atn_Lph,'k--',Atn_Cph,'r--', Atny,'y--'); hold on; %
-title('Den slutna fÃ¶rstÃ¤rkningen, At'); legend('A_t','A_{tn,Lph}','A_{tn,Cph}','A_t_ny','Location','Best')
-    
-figure(3); step((-1)*At);hold on;step(Atn_Lph);step((-1)*Atn_Cph);step((-1)*Atny); 
-title('Stegsvaren fÃ¶re och efter kompensering'); legend('A_t','A_{tn,Lph}','A_{tn,Cph}','A_t_ny','Location','Best')
+figure(2);
+bode(At,'b',Atn_Lph,'k--',Atn_Cph,'r--', Atny,'y--');
+title('Den slutna förstärkningen, At');
+legend('A_t','A_{tn,Lph}','A_{tn,Cph}','A_t_ny','Location','Best')
+ 
+figure(3);
+step((-1)*At);
+hold on;
+step(Atn_Lph);
+step((-1)*Atn_Cph);
+step((-1)*Atny); 
+title('Stegsvaren före och efter kompensering');
+legend('A_t','A_{tn,Lph}','A_{tn,Cph}','A_t_ny','Location','Best')
 
 
-
-%%%%%% HJÃ„LP FÃ–R ATT PLOTTA MÃ„TRESULTAT TILLSAMMANS (SAMMA FIGUR) MED SIMULERAD PRESTANDA (Kompenserat
-%%%%%% och okompenserat)
-% W_labbet=[frekvensvektor frÃ¥n labbet].*(2*pi);
-% At_labbet_kompenserat_dB=[mÃ¤tresultat]
-% At_labbet_kompenserat_fas=[mÃ¤tresultat]
-%pÃ¥ samma sÃ¤tt lÃ¤gger fÃ¶r At_okompenserat
-W=[1:100:1e6].*(2*pi);
+%% HJÄLP FÃ–R ATT PLOTTA MÄTRESULTAT TILLSAMMANS (SAMMA FIGUR) MED SIMULERAD PRESTANDA (Kompenserat
+% och okompenserat)
+% W_labbet = [frekvensvektor från labbet].*(2*pi);
+% At_labbet_kompenserat_dB = [mätresultat]
+% At_labbet_kompenserat_fas = [mätresultat]
+%på samma sätt lägger för At_okompenserat
+W = [1:100:1e6].*(2*pi);
 [MAG_At, PHASE_At] = bode(At,W);
-for k=1:length(W)
-    dB_MAG_At(k)=20*log10(MAG_At(1,1,k));
-    phase_At(k)=PHASE_At(1,1,k);
+for k = 1:length(W)
+    dB_MAG_At(k) = 20*log10(MAG_At(1,1,k));
+    phase_At(k) = PHASE_At(1,1,k);
 end
 % semilogx(W,dB_MAG_At,'b', W_labbet, At_labbet_kompenserat_dB,'r', W_labbet,At_labbet_okompenserat_dB,'k');
 % semilogx(W,phase_At,'b', W_labbet, At_labbet_kompenserat_fas,'r', W_labbet,At_labbet_okompenserat_fas,'k');
-% %xlabel och ylabel fÃ¶r axlarna
+% %xlabel och ylabel för axlarna
 figure(4);
-semilogx(W,dB_MAG_At,'b');%hold on; ... lÃ¤gg till mÃ¤tresultat
+semilogx(W,dB_MAG_At,'b');%hold on; ... lägg till mätresultat
 figure(5);
-semilogx(W,phase_At,'b');%hold on; ...lÃ¤gg till mÃ¤tresultat
+semilogx(W,phase_At,'b');%hold on; ...lägg till mätresultat
