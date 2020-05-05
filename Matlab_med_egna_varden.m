@@ -72,7 +72,8 @@ AtINF_Lph = 1/(R1 + s*Lph);
 
 %Efter kompensering för MFM med fantomnolla:
 %Lph serie med R1:
-ABs_n_Lph = ABnoll*(1-s/n)/((1-s/P1)*(1-s/P2)*(1-s/(delta_Lph*n)));
+ABs_n_Lph = ABnoll*(1-s/n)/...
+    ((1-s/P1)*(1-s/P2)*(1-s/(delta_Lph*n)));
 Atn_Lph = AtINF_Lph*(-1)*ABs_n_Lph/(1-ABs_n_Lph);
 
 %Cph parallel med Rs
@@ -81,32 +82,38 @@ Cph = -1/(Rs*n);
 AtINF_Cph = AtINF;
 %Efter kompensering för MFM med fantomnolla:
 %Cph || Rs:
-ABs_n_Cph = ABnoll*(1-s/n)/((1-s/P1)*(1-s/P2)*(1-s/(delta_Lph*n)))
+ABs_n_Cph = ABnoll*(1-s/n)/...
+    ((1-s/P1)*(1-s/P2)*(1-s/(delta_Lph*n)))
 Atn_Cph = AtINF_Cph*(-1)*ABs_n_Cph/(1-ABs_n_Cph) 
 
 
 %% FIGURER
-%Fasmarginal kollas "open loop", dvs frekvensen w0, där |AB(w0)| = 1 = 0dB, före = ABs och efter = ABs_n kompensering
+% Fasmarginal kollas "open loop", dvs frekvensen w0,
+% där |AB(w0)| = 1 = 0dB, före = ABs och efter = ABs_n kompensering
 %(Bode-funktionen behöver ibland ett (-1).* pga 'Phase unwrap')
-figure(1);
-bode((-1).*ABs,'b',(-1).*ABs_n_Lph,'k--', (-1).*ABs_n_Cph, 'r--', (-1).*ABsny, 'y--'); 
+figure(1)
+bode((-1).*ABs,'b',(-1).*ABs_n_Lph,'k--',...
+    (-1).*ABs_n_Cph, 'r--', (-1).*ABsny, 'y--')
+grid on
 title('Slingförstärkning:');
-legend('AB(s)','AB_n Lph(s)','AB_nCph(s)','ABny(s)','Location','Best')
+legend('$A\beta(s)$','$A\beta\_{n,Lph}(s)$',...
+    '$A\beta\_{n,Cph}(s)$','$A\beta\_{ny}(s)$',...
+    'Interpreter','latex', 'Location','Best')
 
-figure(2);
-bode(At,'b',Atn_Lph,'k--',Atn_Cph,'r--', Atny,'y--');
+figure(2)
+bode(At,'b',Atn_Lph,'k--',Atn_Cph,'r--', Atny,'y--')
+grid on
 title('Den slutna förstärkningen, At');
-legend('A_t','A_{tn,Lph}','A_{tn,Cph}','A_t_ny','Location','Best')
- 
-figure(3);
-step((-1)*At);
-hold on;
-step(Atn_Lph);
-step((-1)*Atn_Cph);
-step((-1)*Atny); 
-title('Stegsvaren före och efter kompensering');
-legend('A_t','A_{tn,Lph}','A_{tn,Cph}','A_t_ny','Location','Best')
+legend('$A\_t$','$A\_{t,n,Lph}$',...
+    '$A\_{t,n,Cph}$','$A\_{t_ny}$',...
+    'Interpreter','latex','Location','Best')
 
+figure(3)
+stepplot((-1)*At, Atn_Lph, (-1)*Atn_Cph, (-1)*Atny)
+title('Stegsvaren före och efter kompensering');
+legend('$A\_t$','$A\_{t,n,Lph}$',...
+    '$A\_{t,n,Cph}$','$A\_{t_ny}$',...
+    'Interpreter','latex','Location','Best')
 
 %% HJÄLP FÃ–R ATT PLOTTA MÄTRESULTAT TILLSAMMANS (SAMMA FIGUR) MED SIMULERAD PRESTANDA (Kompenserat
 % och okompenserat)
@@ -127,3 +134,18 @@ figure(4);
 semilogx(W,dB_MAG_At,'b');%hold on; ... lägg till mätresultat
 figure(5);
 semilogx(W,phase_At,'b');%hold on; ...lägg till mätresultat
+
+%% Save graphs in following format and settings
+for k = 1:5
+    figname = ['figure', num2str(k)];
+    figure(k)
+    title('')
+    set(gca,...
+    'XGrid','on',...
+    'YGrid', 'on',...
+    'Fontsize', 10,...
+    'linewidth', 1,...
+    'FontName', 'Arial')
+    saveas(gcf,figname,'epsc')
+end    
+    
