@@ -140,19 +140,22 @@ load R9_data.mat
 R9_freq = R9amplitude(:,1);
 R9_amp = R9amplitude(:,2);
 R9_deg = R9amplitude(:,3);
-subplot(1,2,1)
-semilogx(R9_freq, R9_deg)
-axis([1 1e6 -180 0])
+
+subplot(2,1,1)
+semilogx(R9_freq, R9_amp)
+axis([1e2 1e6 -80 -35])
 grid on
-xlabel('frequency (Hz)')
+xlabel('Frequency (Hz)')
+ylabel('Magnitude (dB) ')
+
+subplot(2,1,2)
+semilogx(R9_freq, R9_deg)
+axis([1e2 1e6 -180 0])
+grid on
+xlabel('Frequency (Hz)')
 ylabel('Polarity (deg)')
 
-subplot(1,2,2)
-semilogx(R9_freq, R9_amp)
-axis([1 1e6 -80 -35])
-grid on
-xlabel('frequency (Hz)')
-ylabel('Amplitude dB ')
+
 
 
 %% Save graphs in following format and settings
