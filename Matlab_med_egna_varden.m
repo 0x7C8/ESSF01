@@ -74,7 +74,7 @@ AtINF_Lph = 1/(R1 + s*Lph);
 %Lph serie med R1:
 ABs_n_Lph = ABnoll*(1-s/n)/...
     ((1-s/P1)*(1-s/P2)*(1-s/(delta_Lph*n)));
-Atn_Lph = AtINF_Lph*(-1)*ABs_n_Lph/(1-ABs_n_Lph);
+Atn_Lph = AtINF_Lph*ABs_n_Lph/(1-ABs_n_Lph);
 
 %Cph parallel med Rs
 delta_Cph = 1.5;
@@ -109,7 +109,7 @@ legend('$A\_t$','$A\_{t,n,Lph}$',...
     'Interpreter','latex','Location','Best')
 
 figure(3)
-stepplot((-1)*At, Atn_Lph, (-1)*Atn_Cph, (-1)*Atny)
+stepplot((-1)*At, (-1)*Atn_Lph, (-1)*Atn_Cph, (-1)*Atny)
 title('Stegsvaren före och efter kompensering');
 legend('$A\_t$','$A\_{t,n,Lph}$',...
     '$A\_{t,n,Cph}$','$A\_{t_ny}$',...
@@ -141,15 +141,16 @@ R9_freq = R9amplitude(:,1);
 R9_amp = R9amplitude(:,2);
 R9_deg = R9amplitude(:,3);
 
+figure(6)
 subplot(2,1,1)
-semilogx(R9_freq, R9_amp)
+semilogx(R9_freq*2*pi, R9_amp)
 axis([1e2 1e6 -80 -35])
 grid on
 xlabel('Frequency (Hz)')
 ylabel('Magnitude (dB) ')
 
 subplot(2,1,2)
-semilogx(R9_freq, R9_deg)
+semilogx(R9_freq*2*pi, R9_deg)
 axis([1e2 1e6 -180 0])
 grid on
 xlabel('Frequency (Hz)')
