@@ -135,10 +135,11 @@ end
 % semilogx(W,dB_MAG_At,'b', W_labbet, At_labbet_kompenserat_dB,'r', W_labbet,At_labbet_okompenserat_dB,'k');
 % semilogx(W,phase_At,'b', W_labbet, At_labbet_kompenserat_fas,'r', W_labbet,At_labbet_okompenserat_fas,'k');
 % %xlabel och ylabel för axlarna
-figure(4);
-semilogx(W,dB_MAG_At,'b');%hold on; ... lägg till mätresultat
-figure(5);
-semilogx(W,phase_At,'b');%hold on; ...lägg till mätresultat
+
+%figure(4);
+%semilogx(W,dB_MAG_At,'b');%hold on; ... lägg till mätresultat
+%figure(5);
+%semilogx(W,phase_At,'b');%hold on; ...lägg till mätresultat
 
 %% Simulated data
 load R9_data.mat   % remove!
@@ -148,20 +149,74 @@ load Sim_Klippning.mat
 load Sim_NarrowSvar.mat
 load Sim_NarrowTran.mat
 
+%% EJ KOMPENSERAT
+figure(11) 
+subplot(2,1,1)
+semilogx(LtSpiceEjKomp(:,1),LtSpiceEjKomp(:,2))
+grid on
+xlabel('Frequency (Hz)')
+ylabel('?? ')
+
+subplot(2,1,2)
+semilogx(LtSpiceEjKomp(:,1),LtSpiceEjKomp(:,3))
+grid on
+xlabel('Frequency (Hz)')
+ylabel('??')
+
+%% EJ KOMPENSERAT TRANSIENT
+figure(12)
+plot(LtSpiceEjKompTran(:,1),LtSpiceEjKompTran(:,2))
+grid on
+axis([0 2e-4 4.5e-3 6.5e-3])
+xlabel('Time (s)')
+ylabel('Amplitude')
+
+%% KLIPPNINGEN
+figure(13)
+plot(LtSpiceKlippning(:,1),LtSpiceKlippning(:,2))
+grid on
+axis([0 1.5e-2 3.5e-3 5.7e-3])
+xlabel('Time (s)')
+ylabel('Amplitude')
+
+
+%% NARROWBANDING SVAR
+figure(14)
+subplot(2,1,1)
+semilogx(LtSpiceSvarNarrow(:,1),LtSpiceSvarNarrow(:,2))
+grid on
+xlabel('Frequency (Hz)')
+ylabel('?? ')
+
+subplot(2,1,2)
+semilogx(LtSpiceSvarNarrow(:,1),LtSpiceSvarNarrow(:,3))
+grid on
+xlabel('Frequency (Hz)')
+ylabel('??')
+
+%% NARROWBANDING TRANSIENT
+figure(15)
+plot(LtSpiceNarrowTran(:,1),LtSpiceNarrowTran(:,2))
+grid on
+axis([0 5e-4 4.5e-3 6.5e-3])
+xlabel('Time (s)')
+ylabel('Amplitude')
+
+%%
 R9_freq = R9amplitude(:,1);
 R9_amp = R9amplitude(:,2);
 R9_deg = R9amplitude(:,3);
 
 figure(6)
 subplot(2,1,1)
-semilogx(R9_freq*2*pi, R9_amp)
+semilogx(R9_freq, R9_amp)
 axis([1e2 1e6 -80 -35])
 grid on
 xlabel('Frequency (Hz)')
 ylabel('Magnitude (dB) ')
 
 subplot(2,1,2)
-semilogx(R9_freq*2*pi, R9_deg)
+semilogx(R9_freq, R9_deg)
 axis([1e2 1e6 -180 0])
 grid on
 xlabel('Frequency (Hz)')
@@ -171,7 +226,7 @@ ylabel('Polarity (deg)')
 
 
 %% Save graphs in following format and settings
-for k = 1:5
+for k = 1:3
     figname = ['figure', num2str(k)];
     figure(k)
     title('')
