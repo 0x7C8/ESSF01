@@ -4,7 +4,7 @@
 %2-stegs förstärkare (ASGE-GE), före och efter kompensering
 %Med Egna värden
 
-clear all; close all;
+clear; close all
 
 %% Definiera Data
 VT = 25e-3;
@@ -95,6 +95,9 @@ figure(1)
 bode((-1).*ABs,'b',(-1).*ABs_n_Lph,'k--',...
     (-1).*ABs_n_Cph, 'r--', (-1).*ABsny, 'y--')
 grid on
+h = gcr;
+setoptions(h,'FreqUnits','Hz')
+
 title('Slingförstärkning:');
 legend('$A\beta(s)$','$A\beta\_{n,Lph}(s)$',...
     '$A\beta\_{n,Cph}(s)$','$A\beta\_{ny}(s)$',...
@@ -103,6 +106,8 @@ legend('$A\beta(s)$','$A\beta\_{n,Lph}(s)$',...
 figure(2)
 bode(At,'b',Atn_Lph,'k--',Atn_Cph,'r--', Atny,'y--')
 grid on
+h = gcr;
+setoptions(h,'FreqUnits','Hz')
 title('Den slutna förstärkningen, At');
 legend('$A\_t$','$A\_{t,n,Lph}$',...
     '$A\_{t,n,Cph}$','$A\_{t_ny}$',...
@@ -135,8 +140,14 @@ semilogx(W,dB_MAG_At,'b');%hold on; ... lägg till mätresultat
 figure(5);
 semilogx(W,phase_At,'b');%hold on; ...lägg till mätresultat
 
-%% Simulated data (not finished!)
-load R9_data.mat
+%% Simulated data
+load R9_data.mat   % remove!
+load Sim_EjKomp.mat
+load Sim_EjKompTran.mat
+load Sim_Klippning.mat
+load Sim_NarrowSvar.mat
+load Sim_NarrowTran.mat
+
 R9_freq = R9amplitude(:,1);
 R9_amp = R9amplitude(:,2);
 R9_deg = R9amplitude(:,3);
