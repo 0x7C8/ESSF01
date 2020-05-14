@@ -120,93 +120,19 @@ legend('$A\_t$','$A\_{t,n,Lph}$',...
     '$A\_{t,n,Cph}$','$A\_{t_ny}$',...
     'Interpreter','latex','Location','Best')
 
-%% HJÄLP FÃ–R ATT PLOTTA MÄTRESULTAT TILLSAMMANS (SAMMA FIGUR) MED SIMULERAD PRESTANDA (Kompenserat
-% och okompenserat)
-% W_labbet = [frekvensvektor från labbet].*(2*pi);
-% At_labbet_kompenserat_dB = [mätresultat]
-% At_labbet_kompenserat_fas = [mätresultat]
-%på samma sätt lägger för At_okompenserat
-W = [1:100:1e6].*(2*pi);
-[MAG_At, PHASE_At] = bode(At,W);
-for k = 1:length(W)
-    dB_MAG_At(k) = 20*log10(MAG_At(1,1,k));
-    phase_At(k) = PHASE_At(1,1,k);
-end
-% semilogx(W,dB_MAG_At,'b', W_labbet, At_labbet_kompenserat_dB,'r', W_labbet,At_labbet_okompenserat_dB,'k');
-% semilogx(W,phase_At,'b', W_labbet, At_labbet_kompenserat_fas,'r', W_labbet,At_labbet_okompenserat_fas,'k');
-% %xlabel och ylabel för axlarna
-
-%figure(4);
-%semilogx(W,dB_MAG_At,'b');%hold on; ... lägg till mätresultat
-%figure(5);
-%semilogx(W,phase_At,'b');%hold on; ...lägg till mätresultat
-
 %% Simulated data
 load Sim_R9_I.mat  
 load Sim_R9_ejkomp.mat
-load Sim_EjKomp.mat
 load Sim_EjKompTran.mat
 load Sim_Klippning.mat
-load Sim_NarrowSvar.mat
 load Sim_NarrowTran.mat
 
-%% EJ KOMPENSERAT
-% delete?
-figure(11) 
+%% 
+figure(4)
 subplot(2,1,1)
-semilogx(LtSpiceEjKomp(:,1),LtSpiceEjKomp(:,2))
-grid on
-xlabel('Frequency (Hz)')
-ylabel('Magnitude')
-
-subplot(2,1,2)
-semilogx(LtSpiceEjKomp(:,1),LtSpiceEjKomp(:,3))
-grid on
-xlabel('Frequency (Hz)')
-ylabel('??')
-
-%% EJ KOMPENSERAT TRANSIENT &  NARROWBANDING TRANSIENT
-figure(12)
-plot(LtSpiceEjKompTran(:,1),LtSpiceEjKompTran(:,2), 'b-')
-hold on
-plot(LtSpiceNarrowTran(:,1),LtSpiceNarrowTran(:,2), 'r-')
-grid on
-axis([0 2.5e-4 4.5e-3 6.5e-3])
-legend('Utan kompensering', 'Med kompensering')
-xlabel('Time (s)')
-ylabel('Amplitude')
-
-%% KLIPPNINGEN
-figure(13)
-plot(LtSpiceKlippning(:,1),1e3*LtSpiceKlippning(:,2))
-grid on
-axis([0 1.5e-2 3.5 5.7])
-xlabel('Time (s)')
-ylabel('Amplitude (mA)')
-
-%% NARROWBANDING SVAR
-% TODO delete?
-figure(14)
-subplot(2,1,1)
-semilogx(LtSpiceSvarNarrow(:,1),LtSpiceSvarNarrow(:,2))
-grid on
-xlabel('Frequency (Hz)')
-ylabel('Magnitude')
-
-subplot(2,1,2)
-semilogx(LtSpiceSvarNarrow(:,1),LtSpiceSvarNarrow(:,3))
-grid on
-xlabel('Frequency (Hz)')
-ylabel('??')
-
-
-%%
-
-figure(6)
-subplot(2,1,1)
-semilogx(R9I2(:,1), R9I2(:,2), 'r-')
-hold on
 semilogx(R9Iejkomp(:,1), R9Iejkomp(:,2), 'b-')
+hold on
+semilogx(R9I2(:,1), R9I2(:,2), 'r-')
 
 axis([1e2 1e6 -80 -30])
 grid on
@@ -214,18 +140,36 @@ xlabel('Frequency (Hz)')
 ylabel('Magnitude (dB) ')
 
 subplot(2,1,2)
-semilogx(R9I2(:,1), R9I2(:,3), 'r-')
-hold on
 semilogx(R9Iejkomp(:,1), R9Iejkomp(:,3), 'b-')
+hold on
+semilogx(R9I2(:,1), R9I2(:,3), 'r-')
 
 axis([1e2 1e6 -180 0])
-grid on
+legend('Utan kompensering','Med kompensering',...
+    'Interpreter','latex', 'Location','Best')
 xlabel('Frequency (Hz)')
 ylabel('Polarity (deg)')
 
+%% EJ KOMPENSERAT TRANSIENT &  NARROWBANDING TRANSIENT
+figure(5)
+plot(1e6*LtSpiceEjKompTran(:,1),LtSpiceEjKompTran(:,2), 'b-')
+hold on
+plot(1e6*LtSpiceNarrowTran(:,1),LtSpiceNarrowTran(:,2), 'r-')
+axis([0 2.5e2 4.5e-3 6.5e-3])
+legend('Utan kompensering', 'Med kompensering',...
+    'Interpreter','latex', 'Location','Best')
+xlabel('Time (us)')
+ylabel('Amplitude')
+
+%% KLIPPNINGEN
+figure(6)
+plot(1e3*LtSpiceKlippning(:,1),1e3*LtSpiceKlippning(:,2))
+axis([0 1.5e1 3.5 5.7])
+xlabel('Time (ms)')
+ylabel('Amplitude (mA)')
 
 %% Save graphs in following format and settings
-for k = 1:3
+for k = 1:6
     figname = ['figure', num2str(k)];
     figure(k)
     title('')
