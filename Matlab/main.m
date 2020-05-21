@@ -21,7 +21,7 @@ rpi2 = Bf2*VT/Ic2;
 gm2 = Ic2/VT;
 
 Rbias = 150; %Dålig biasering med Rbias! (använd strömspegel) Rbias = 0.7/Ic1ab ,Biaserar upp GE steget.
-rpi2_new = rpi2*Rbias/(rpi2+Rbias)
+rpi2_new = rpi2*Rbias/(rpi2+Rbias);
 
 %DC slingförstärkning och slingpoler:
 ABnoll = -(Bf1*Bf2*R1)/(Rs+R1+rpi_p);
@@ -42,7 +42,7 @@ n = -(w0_2p^2)/(sqrt(2)*w0_2p+P1+P2)
 s = zpk('s'); %Definiera s
 
 %Före kompensering: (Betraktas som ett system med två poler)
-ABs = ABnoll/((1-s/P1)*(1-s/P2)) 
+ABs = ABnoll/((1-s/P1)*(1-s/P2));
 At = AtINF*(-1)*ABs/(1-ABs); %Slutna förstärkningen, icke kompenserad.
 % 
 %Kompensering med capacitive narrow banding
@@ -52,8 +52,8 @@ Atny = AtINF*(-1)*ABsny/(1-ABsny); %Slutna förstärkningen, kompenserad Capacitiv
 %
 %%Undersök fasmarginal före och efter kompensering:
 
-[gain_margin_before, phase_margin_before] = margin((-1)*ABs) %Ignorera gain margin (mer om den i reglerteknik). 
-[gain_margin_after, phase_margin_after] = margin((-1)*ABsny)
+[gain_margin_before, phase_margin_before] = margin((-1)*ABs); %Ignorera gain margin (mer om den i reglerteknik). 
+[gain_margin_after, phase_margin_after] = margin((-1)*ABsny);
 %Matlab verkar inte gilla negativa system, så -1 behövs för att få rätt fasmarginal.
 
 
@@ -76,8 +76,8 @@ AtINF_Cph = AtINF;
 %Efter kompensering för MFM med fantomnolla:
 %Cph || Rs:
 ABs_n_Cph = ABnoll*(1-s/n)/...
-    ((1-s/P1)*(1-s/P2)*(1-s/(delta_Lph*n)))
-Atn_Cph = AtINF_Cph*(-1)*ABs_n_Cph/(1-ABs_n_Cph) 
+    ((1-s/P1)*(1-s/P2)*(1-s/(delta_Lph*n)));
+Atn_Cph = AtINF_Cph*(-1)*ABs_n_Cph/(1-ABs_n_Cph); 
 
 
 %% Figures (Matlab simulation)
@@ -91,76 +91,108 @@ bode((-1).*ABs,'b',...
     (-1).*ABsny, 'y--')
 grid on
 setoptions(gcr,'FreqUnits','Hz')
-set(findall(gcf, 'Type', 'Line'),'LineWidth',2);
-
+set(findall(gcf, 'Type', 'Line'),'LineWidth',1);
 title('Slingförstärkning:');
 [~,legObj] = legend('$A\beta(s)$','$A\beta\_{n,Lph}(s)$',...
     '$A\beta\_{n,Cph}(s)$','$A\beta\_{ny}(s)$',...
     'Interpreter','latex',...
     'Location','Best',...
     'Fontsize', 11);
-set(findobj(legObj,'type','line'),'linewidth',2)
+set(findobj(legObj,'type','line'),'linewidth',1.5)
 % ---------------------------------------------
-figure(2)
+figure(2);
 bode(At,'b',Atn_Lph,'k--',Atn_Cph,'r--', Atny,'y--')
 grid on
-setoptions(gcr,...
-    'FreqUnits','Hz',...
+setoptions(gcr,'FreqUnits','Hz',...
     'Xlim', [1e3 1e6])
+set(findall(gcf, 'Type', 'Line'),'LineWidth',1);
 title('Den slutna förstärkningen, At');
 [~,legObj] = legend('$A\_t$','$A\_{t,n,Lph}$',...
     '$A\_{t,n,Cph}$','$A\_{t_ny}$',...
     'Interpreter','latex',...
     'Location','Best',...
     'Fontsize', 11);
-set(findobj(legObj,'type','line'),'linewidth',2)
+set(findobj(legObj,'type','line'),'linewidth',1.5)
 % ---------------------------------------------
 figure(3)
 stepplot((-1)*At, (-1)*Atn_Lph, (-1)*Atn_Cph, (-1)*Atny)
+grid on
+set(findall(gcf, 'Type', 'Line'),'LineWidth',1);
 title('Stegsvaren före och efter kompensering');
-legend('$A\_t$','$A\_{t,n,Lph}$',...
+[~,legObj] = legend('$A\_t$','$A\_{t,n,Lph}$',...
     '$A\_{t,n,Cph}$','$A\_{t_ny}$',...
-    'Interpreter','latex','Location','Best')
+    'Interpreter','latex',...
+    'Location','Best',...
+    'Fontsize', 11);
+set(findobj(legObj,'type','line'),'linewidth',1.5)
 
 %% Figures (LTspice + Matlab)
 load ltspice_data_old.mat % Old data from LTspice
+% TODO: ADD new data
+[MAG_At, PHASE_At] = bode(At,R9Iejkomp(:,1)*2*pi);
+[MAG_Atny, PHASE_Atny] = bode(Atny,R9I2(:,1)*2*pi);
 
 figure(4)
 subplot(2,1,1)
 semilogx(R9Iejkomp(:,1), R9Iejkomp(:,2), 'b-')
 hold on
 semilogx(R9I2(:,1), R9I2(:,2), 'r-')
+semilogx(R9Iejkomp(:,1), 20*log10(MAG_At(:)), 'b--') 
+semilogx(R9I2(:,1), 20*log10(MAG_Atny(:)), 'r--')
 
-axis([1e2 1e6 -80 -30])
+axis([1e2 1e6 -90 -30])
 grid on
 xlabel('Frequency (Hz)')
 ylabel('Magnitude (dB) ')
-
+% ---------------------------------------------
 subplot(2,1,2)
-semilogx(R9Iejkomp(:,1), R9Iejkomp(:,3), 'b-')
+semilogx(R9Iejkomp(:,1), 180+R9Iejkomp(:,3), 'b-')
 hold on
-semilogx(R9I2(:,1), R9I2(:,3), 'r-')
+semilogx(R9Iejkomp(:,1), PHASE_At(:), 'b--') 
+semilogx(R9I2(:,1), 180+R9I2(:,3), 'r-')
+semilogx(R9I2(:,1), PHASE_Atny(:), 'r--')
 
-axis([1e2 1e6 -180 0])
-legend('Utan kompensering','Med kompensering',...
-    'Interpreter','latex', 'Location','Best')
+axis([1e2 1e6 0 180])
+grid on
+set(findall(gcf, 'Type', 'Line'),'LineWidth',1);
+[~,legObj] = legend('Utan (LTspice)','Utan (Teoretisk)',...
+    'Med (LTspice)','Med (Teoretisk)',...
+    'Interpreter','latex',...
+    'Location','Best',...
+    'Fontsize', 10);
+set(findobj(legObj,'type','line'),'linewidth',1.5)
 xlabel('Frequency (Hz)')
 ylabel('Polarity (deg)')
 
-% EJ KOMPENSERAT TRANSIENT &  NARROWBANDING TRANSIENT
+%% EJ KOMPENSERAT TRANSIENT &  NARROWBANDING TRANSIENT
+T = linspace(0,5e-4,1000);
+[AMP_At] = step((-1)*At, T); % TODO WTF?????
+[AMP_Atny] = step((-1)*Atny, T); % TODO too low V_in in LTspice?
+
 figure(5)
 plot(1e6*LtSpiceEjKompTran(:,1),LtSpiceEjKompTran(:,2), 'b-')
 hold on
+plot(1e6*T,(5.535e-3-AMP_At(end))+AMP_At(:), 'b--')
 plot(1e6*LtSpiceNarrowTran(:,1),LtSpiceNarrowTran(:,2), 'r-')
+plot(1e6*T,(5.535e-3-AMP_Atny(end))+AMP_Atny(:), 'r--')
 axis([0 2.5e2 4.5e-3 6.5e-3])
-legend('Utan kompensering', 'Med kompensering',...
-    'Interpreter','latex', 'Location','Best')
+grid on
+set(findall(gcf, 'Type', 'Line'),'LineWidth',1);
+[~,legObj] = legend('Utan (LTspice)', 'Utan (Teoretisk)',...
+    'Med (LTspice)','Med (Teoretisk)',...
+    'Interpreter','latex',...
+    'Location','Best',...
+    'Fontsize', 10);
+set(findobj(legObj,'type','line'),'linewidth',1.5)
 xlabel('Time (us)')
 ylabel('Amplitude')
 
-% INGEN KLIPPNING
+%% INGEN KLIPPNING
 figure(6)
-plot(1e3*LtSpiceKlippning(:,1),1e3*LtSpiceKlippning(:,2))
+plot(1e3*LtSpiceKlippning(:,1),1e3*LtSpiceKlippning(:,2),...
+    'Color',[0 0 .4])
+grid on
+set(findall(gcf, 'Type', 'Line'),'LineWidth',1.3);
 axis([0 1.5e1 3.5 5.7])
 xlabel('Time (ms)')
 ylabel('Amplitude (mA)')
@@ -172,12 +204,3 @@ for k = 1:6
     title('')   % Remove Title before saving
 %    saveas(gcf,figname,'epsc')
 end    
-
-% ------ Shared graph settings -------
-function customPlotSettings()
-    set(gca,...
-        'Fontsize', 12,...
-        'linewidth', 1,...
-        'FontName', 'Arial');
-end
- 
