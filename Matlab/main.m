@@ -127,18 +127,18 @@ title('Stegsvaren före och efter kompensering');
 set(findobj(legObj,'type','line'),'linewidth',1.5)
 
 %% Figures (LTspice + Matlab)
-load ltspice_data_old.mat % Old data from LTspice
-% TODO: ADD new data
-[MAG_At, PHASE_At] = bode(At,R9Iejkomp(:,1)*2*pi);
-[MAG_Atny, PHASE_Atny] = bode(Atny,R9I2(:,1)*2*pi);
+% load ltspice_data_old.mat % Old data from LTspice
+load ltspice_data_new.mat
+[MAG_At, PHASE_At] = bode(At,LTs_f_ejkomp(:,1)*2*pi);
+[MAG_Atny, PHASE_Atny] = bode(Atny,LTs_f_komp(:,1)*2*pi);
 
 figure(4)
 subplot(2,1,1)
-semilogx(R9Iejkomp(:,1), R9Iejkomp(:,2), 'b-')
+semilogx(LTs_f_ejkomp(:,1), LTs_f_ejkomp(:,2), 'b-')
 hold on
-semilogx(R9I2(:,1), R9I2(:,2), 'r-')
-semilogx(R9Iejkomp(:,1), 20*log10(MAG_At(:)), 'b--') 
-semilogx(R9I2(:,1), 20*log10(MAG_Atny(:)), 'r--')
+semilogx(LTs_f_komp(:,1), LTs_f_komp(:,2), 'r-')
+semilogx(LTs_f_ejkomp(:,1), 20*log10(MAG_At(:)), 'b--') 
+semilogx(LTs_f_komp(:,1), 20*log10(MAG_Atny(:)), 'r--')
 
 axis([1e2 1e6 -90 -30])
 grid on
@@ -146,11 +146,11 @@ xlabel('Frequency (Hz)')
 ylabel('Magnitude (dB) ')
 % ---------------------------------------------
 subplot(2,1,2)
-semilogx(R9Iejkomp(:,1), 180+R9Iejkomp(:,3), 'b-')
+semilogx(LTs_f_ejkomp(:,1), 180+LTs_f_ejkomp(:,3), 'b-')
 hold on
-semilogx(R9Iejkomp(:,1), PHASE_At(:), 'b--') 
-semilogx(R9I2(:,1), 180+R9I2(:,3), 'r-')
-semilogx(R9I2(:,1), PHASE_Atny(:), 'r--')
+semilogx(LTs_f_ejkomp(:,1), PHASE_At(:), 'b--') 
+semilogx(LTs_f_komp(:,1), 180+LTs_f_komp(:,3), 'r-')
+semilogx(LTs_f_komp(:,1), PHASE_Atny(:), 'r--')
 
 axis([1e2 1e6 0 180])
 grid on
@@ -166,16 +166,18 @@ ylabel('Polarity (deg)')
 
 %% EJ KOMPENSERAT TRANSIENT &  NARROWBANDING TRANSIENT
 T = linspace(0,5e-4,1000);
-[AMP_At] = step((-1)*At, T); % TODO WTF?????
-[AMP_Atny] = step((-1)*Atny, T); % TODO too low V_in in LTspice?
+[AMP_At] = step(.1*(-1)*At, T); % TODO WTF?????
+[AMP_Atny] = step(.1*(-1)*Atny, T); % TODO too low V_in in LTspice?
 
 figure(5)
-plot(1e6*LtSpiceEjKompTran(:,1),LtSpiceEjKompTran(:,2), 'b-')
+plot(1e6*LtSpiceEjKompTran(:,1),...
+    LtSpiceEjKompTran(:,2) - LtSpiceEjKompTran(1,2), 'b-')
 hold on
-plot(1e6*T,(5.535e-3-AMP_At(end))+AMP_At(:), 'b--')
-plot(1e6*LtSpiceNarrowTran(:,1),LtSpiceNarrowTran(:,2), 'r-')
-plot(1e6*T,(5.535e-3-AMP_Atny(end))+AMP_Atny(:), 'r--')
-axis([0 2.5e2 4.5e-3 6.5e-3])
+plot(1e6*T,AMP_At(:), 'b--')
+plot(1e6*LtSpiceNarrowTran(:,1),...
+    LtSpiceNarrowTran(:,2) - LtSpiceNarrowTran(1,2), 'r-')
+plot(1e6*T,AMP_Atny(:), 'r--')
+axis([0 2.5e2 0 1.8e-3])
 grid on
 set(findall(gcf, 'Type', 'Line'),'LineWidth',1);
 [~,legObj] = legend('Utan (LTspice)', 'Utan (Teoretisk)',...
@@ -202,5 +204,5 @@ for k = 1:6
     figname = ['figure', num2str(k)];
     figure(k)
     title('')   % Remove Title before saving
-%    saveas(gcf,figname,'epsc')
+    saveas(gcf,figname,'epsc')
 end    
